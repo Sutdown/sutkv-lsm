@@ -1,3 +1,6 @@
+#ifndef SKIPLIST_H
+#define SKIPLIST_H
+
 #include<iostream>
 #include<vector>
 #include<memory>
@@ -24,22 +27,22 @@ public:
 	SkipListIterator& operator++() {
 		if (cur)cur = cur->forward[0];
 		return *this;
-	}	// 前置++
+	} // 前置++
 	SkipListIterator operator++(int) {
 		SkipListIterator tmp = *this;
 		++(*this);
 		return tmp;
 	} // 后置++
 
-	bool operator==(const SkipListIterator& other) const {
+	bool operator==(const SkipListIterator &other) const {
 		return cur == other.cur;
-	}// ==
-	bool opretor != (const SkipListIterator & other) const {
+	}
+	bool operator!=(const SkipListIterator &other) const {
 		return !(*this == other);
-	} // !=
+	}
 
-	std::string get_key() const { return node->key; }
-	std::string get_value() const { return node->value; }
+	std::string get_key() const { return cur->key; }
+	std::string get_value() const { return cur->value; }
 
 	bool is_valid() const { return !cur->value.empty(); }
 
@@ -64,7 +67,7 @@ public:
 	void remove(const std::string& key);
 
 	// 获取大小
-	size_t get_size_bytes() const { return size_bytes; }
+	size_t get_size() const { return size_bytes; }
 	int random_level();
 
 	// 清理
@@ -73,4 +76,8 @@ public:
 	// 从磁盘加载
 	std::vector<std::pair<std::string, std::string>> flush();
 
+	SkipListIterator begin() const { return SkipListIterator(head->forward[0]); }
+	SkipListIterator end() const { return SkipListIterator(nullptr); }
 };
+
+#endif // SKIPLIST_H

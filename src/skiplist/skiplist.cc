@@ -1,5 +1,8 @@
-#include "skiplist.h"
+#include "../include/skiplist/skiplist.h"
 
+// SkipListIterator
+
+// SkipList
 SkipList::SkipList(int max_level) : max_level(max_level), cur_level(1), size_bytes(0) {
 	head = std::make_shared<Node>("", "", max_level);
 }
@@ -60,7 +63,7 @@ std::string SkipList::get(const std::string& key) {
 	if (cur && cur->key == key) {
 		return cur->value;
 	}
-	return std::nullopt;
+	return "";
 }
 
 void SkipList::remove(const std::string& key) {

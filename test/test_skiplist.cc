@@ -1,4 +1,4 @@
-#include "src/skiplist/skiplist.h"
+#include "../include/skiplist/skiplist.h"
 #include<gtest/gtest.h>
 #include <vector>
 #include <string>
@@ -6,17 +6,20 @@
 #include <unordered_set>
 
 // 基础功能
-TEST(SkipListTest, Basic) {
-	SkipList sl;
+TEST(SkipListTest, BasicOperations) {
+    SkipList skipList;
 
-	sl.put("a", "1");
-	EXPECT_EQ(sl.get("a").value(), "1");
+	// 测试插入和查找
+	skipList.put("key1", "value1");
+	EXPECT_EQ(skipList.get("key1"), "value1");
 
-	s1.put("a", "2");
-	EXPECT_EQ(sl.get("a").value(), "2");
+	// 测试更新
+	skipList.put("key1", "new_value");
+	EXPECT_EQ(skipList.get("key1"), "new_value");
 
-	sl.remove("a");
-	EXPECT_FALSE(sl.get("a").has_value());
+	// 测试删除
+	skipList.remove("key1");
+	EXPECT_EQ(skipList.get("key1"),"");
 }
 
 // 迭代器
@@ -55,7 +58,7 @@ TEST(SkipListTest, LargeDataADD) {
 	}
 
 	for (auto& p : data) {
-		EXPECT_EQ(sl.get(p.first).value(), p.second);
+		EXPECT_EQ(sl.get(p.first), p.second);
 	}
 }
 
@@ -75,7 +78,7 @@ TEST(SkipListTest, LargeDataRemove) {
 	for (int i = 0; i < 10000; i++) {
 		std::string key = std::to_string(i);
 		sl.remove(key);
-		EXPECT_FALSE(sl.get(key).has_value());
+		EXPECT_EQ(sl.get(key),"");
 	}
 }
 
@@ -84,14 +87,14 @@ TEST(SkipListTest, DuplicateInsert) {
 	SkipList sl;
 	sl.put("a", "1");
 	sl.put("a", "2");
-	EXPECT_EQ(sl.get("a").value(), "2");
+	EXPECT_EQ(sl.get("a"), "2");
 }
 
 // 测试空跳表
 TEST(SkipListTest, EmptySkipList) {
 	SkipList sl;
-	EXPECT_FALSE(skipList.get("nonexistent_key").has_value());
-	skipList.remove("nonexistent_key");
+	EXPECT_EQ(sl.get("nonexistent_key"),"");
+	sl.remove("nonexistent_key");
 }
 
 // 测试随机插入和删除
@@ -112,7 +115,7 @@ TEST(SkipListTest, RandomInsertAndRemove) {
 		std::string key = std::to_string(i);
 		if (rand() % 2) {
 			sl.remove(key);
-			EXPECT_FALSE(sl.get(key).has_value());
+			EXPECT_EQ(sl.get(key),"");
 		}
 	}
 }
@@ -132,7 +135,7 @@ TEST(SkipListTest, MemoryTracking) {
 	EXPECT_EQ(sl.get_size(), expected_size);
 
 	sl.clear();
-	EXPECT_EQ(sl.get_size_bytes(), 0);
+	EXPECT_EQ(sl.get_size(), 0);
 }
 
 int main(int argc, char** argv) {
