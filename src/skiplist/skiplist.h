@@ -13,6 +13,40 @@ struct Node {
 		: key(key), value(value), forward(level, nullptr){}
 };
 
+class SkipListIterator {
+public:
+	SkipListIterator(std::shared_ptr<Node> node) : cur(node) {}
+
+	std::pair<std::string, std::string> operator*() const { 
+		return { cur->key, cur->value };
+	} // 解引用
+
+	SkipListIterator& operator++() {
+		if (cur)cur = cur->forward[0];
+		return *this;
+	}	// 前置++
+	SkipListIterator operator++(int) {
+		SkipListIterator tmp = *this;
+		++(*this);
+		return tmp;
+	} // 后置++
+
+	bool operator==(const SkipListIterator& other) const {
+		return cur == other.cur;
+	}// ==
+	bool opretor != (const SkipListIterator & other) const {
+		return !(*this == other);
+	} // !=
+
+	std::string get_key() const { return node->key; }
+	std::string get_value() const { return node->value; }
+
+	bool is_valid() const { return !cur->value.empty(); }
+
+private:
+	std::shared_ptr<Node> cur;
+};
+
 class SkipList {
 private:
 	std::shared_ptr<Node> head;
