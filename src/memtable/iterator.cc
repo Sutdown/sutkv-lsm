@@ -2,7 +2,7 @@
 #include <vector>
 
 MemTableIterator::MemTableIterator(const MemTable& memtable) {
-	auto cur_table = memtable.cur_table;
+	auto cur_table = memtable.current_table;
 
 	// 获得当前表中的所有元素
 	for (auto iter = cur_table->begin(); iter != cur_table->end(); iter++) {

@@ -51,7 +51,7 @@ void SkipList::put(const std::string& key, const std::string& value) {
 	}
 }
 
-std::string SkipList::get(const std::string& key) {
+std::optional<std::string> SkipList::get(const std::string& key) {
 	auto cur = head;
 	for (int i = cur_level - 1; i >= 0; i--) {
 		while (cur->forward[i] != nullptr && cur->forward[i]->key < key) {
@@ -63,7 +63,7 @@ std::string SkipList::get(const std::string& key) {
 	if (cur && cur->key == key) {
 		return cur->value;
 	}
-	return "";
+	return std::nullopt;
 }
 
 void SkipList::remove(const std::string& key) {

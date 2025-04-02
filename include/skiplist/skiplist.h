@@ -63,7 +63,7 @@ public:
 
 	// 增删改查
 	void put(const std::string& key, const std::string& value);
-	std::string get(const std::string& key);
+	std::optional<std::string> get(const std::string& key);
 	void remove(const std::string& key);
 
 	// 获取大小

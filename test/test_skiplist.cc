@@ -19,7 +19,7 @@ TEST(SkipListTest, BasicOperations) {
 
 	// ²âÊÔÉ¾³ı
 	skipList.remove("key1");
-	EXPECT_EQ(skipList.get("key1"),"");
+	EXPECT_FALSE(skipList.get("key1").has_value());
 }
 
 // µü´úÆ÷
@@ -78,7 +78,7 @@ TEST(SkipListTest, LargeDataRemove) {
 	for (int i = 0; i < 10000; i++) {
 		std::string key = std::to_string(i);
 		sl.remove(key);
-		EXPECT_EQ(sl.get(key),"");
+		EXPECT_FALSE(sl.get(key).has_value());
 	}
 }
 
@@ -93,7 +93,7 @@ TEST(SkipListTest, DuplicateInsert) {
 // ²âÊÔ¿ÕÌø±í
 TEST(SkipListTest, EmptySkipList) {
 	SkipList sl;
-	EXPECT_EQ(sl.get("nonexistent_key"),"");
+	EXPECT_FALSE(sl.get("nonexistent_key").has_value());
 	sl.remove("nonexistent_key");
 }
 
@@ -115,7 +115,7 @@ TEST(SkipListTest, RandomInsertAndRemove) {
 		std::string key = std::to_string(i);
 		if (rand() % 2) {
 			sl.remove(key);
-			EXPECT_EQ(sl.get(key),"");
+			EXPECT_FALSE(sl.get(key).has_value());
 		}
 	}
 }

@@ -17,18 +17,24 @@ void MemTable::put(const std::string& key, const std::string& value) {
 
 std::optional<std::string> MemTable::get(const std::string& key) {
 	auto res = current_table->get(key);
-	if (!res.empty()) {
-		return res;
-	} else {
-		return std::nullopt;
+	if (res.has_value()) {
+		auto data = res.value();
+		if (data!="") {
+			return data;
+		} else {
+			return std::nullopt;
+		}
 	}
 
 	for(auto &table:frozen_tables) {
 		auto res = table->get(key);
-		if (!res.empty()) {
-			return res;
-		} else {
-			return std::nullopt;
+		if (res.has_value()) {
+			auto data = res.value();
+			if (data != "") {
+				return data;
+			} else {
+				return std::nullopt;
+			};
 		}
 	}
 
@@ -44,8 +50,8 @@ void MemTable::clear() {
 }
 
 void MemTable::frozen_cur_table() {
+	frozen_bytes += current_table->get_size();
 	frozen_tables.push_front(std::move(current_table));
-	frozen_bytes += current_table->size_bytes;
 	current_table = std::make_shared<SkipList>();
 }
 
@@ -58,7 +64,7 @@ size_t MemTable::get_frozen_size() const {
 }
 
 size_t MemTable::get_total_size() const {
-	return current_table->get_size() + frozen_bytes;
+	return current_table->get_size() + get_frozen_size();
 }
 
 MemTableIterator MemTable::begin() const {

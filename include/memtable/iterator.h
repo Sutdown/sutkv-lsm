@@ -11,15 +11,15 @@ struct SearchItem {
 	int mem_idx;
 };
 
-bool operator<(const SearchItem& lhs, const SearchItem& rhs) {
+inline bool operator<(const SearchItem& a, const SearchItem& b) {
 	if (a.key != b.key) { return a.key < b.key; }
 	return a.mem_idx < b.mem_idx;
 }
-bool operator>(const SearchItem& lhs, const SearchItem& rhs) {
+inline bool operator>(const SearchItem& a, const SearchItem& b) {
 	if (a.key != b.key) { return a.key > b.key; }
 	return a.mem_idx > b.mem_idx;
 }
-bool operator==(const SearchItem& lhs, const SearchItem& rhs) {
+inline bool operator==(const SearchItem& a, const SearchItem& b) {
 	return a.key == b.key && a.mem_idx == b.mem_idx;
 }
 
@@ -31,7 +31,7 @@ public:
 	std::pair<std::string, std::string> operator*() {
 		return std::make_pair(items.top().key, items.top().value);
 	}
-	MemTableIterator& operator++();
+	MemTableIterator &operator++();
 	MemTableIterator operator++(int);
 
 	bool operator==(const MemTableIterator& other) const;
