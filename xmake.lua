@@ -42,3 +42,11 @@ target("test_block")
     add_deps("block")  
     add_packages("gtest")
     add_includedirs("include")
+
+
+target("test_blockmeta")
+    set_kind("binary")
+    add_files("test/test_blockmeta.cc")
+    add_deps("block")  -- 如果memtable是独立的target，这里需要添加对应的依赖
+    add_packages("gtest")
+    add_includedirs("include")
