@@ -22,35 +22,33 @@ class Block : public::std::enable_shared_from_this<Block> {
 private:
 	std::vector<uint8_t> data;		// 存放数据
 	std::vector<uint16_t> offsets;  // 存放偏移量
-	size_t capacity;				// 容量
 
 	struct Entry {
 		std::string key;
-		std::string value; 
+		std::string value;
 	};
-	Entry get_entry_at(size_t offset)const;
-	std::string get_key_at(size_t offset)const;
-	std::string get_value_at(size_t offset)const;
-	int compare_key_at(size_t offset, const std::string& target)const;
+	Entry get_entry_at(size_t offset) const;
+	std::string get_key_at(size_t offset) const;
+	std::string get_value_at(size_t offset) const;
+	int compare_key_at(size_t offset, const std::string& target) const;
 
 public:
 	Block() = default;
-	Block(size_t capacity);
 
 	// 编码解码
 	std::vector<uint8_t> encode();
-	static std::shared_ptr<Block> decode(const std::vector<uint8_t>& encoded, bool with_hash = false);
+	static std::shared_ptr<Block> decode(const std::vector<uint8_t>& encoded);
 
+	// 获取数据
 	std::string get_first_key();
 	size_t get_offset_at(size_t idx) const;
 
 	// 插入数据，查找数据
-	bool add_entry(const std::string& key, const std::string& value);
+	void add_entry(const std::string& key, const std::string& value);
 	std::optional<std::string> get_value_binary(const std::string& key);
 	
-	size_t cur_size() const; // 返回当前项的数量
-	bool is_empty() const;
+	size_t size() const;
 
 	BlockIterator begin();
-	BlockIterator end();	
+	BlockIterator end();
 };
