@@ -199,6 +199,7 @@ TEST(MemTableTest, IteratorComplexOperations)
 	EXPECT_FALSE(res.has_value());
 }
 
+// question
 TEST(MemTableTest, ConcurrentOperations)
 {
 	MemTable memtable;
