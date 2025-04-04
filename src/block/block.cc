@@ -82,7 +82,13 @@ size_t Block::get_offset_at(size_t idx) const {
     return offsets[idx];
 }
 
-void Block::add_entry(const std::string& key, const std::string& value) {
+bool Block::add_entry(const std::string& key, const std::string& value) {
+    if ((cur_size() + key.size() + value.size() + 3 * sizeof(uint16_t) >
+         capacity) &&
+        !offsets.empty())
+    {
+        return false;
+    }
     // 计算entry大小：key长度(2B) + key + value长度(2B) + value
     size_t entry_size = sizeof(uint16_t) + key.size() + sizeof(uint16_t) + value.size();
     size_t old_size = data.size();
@@ -104,6 +110,8 @@ void Block::add_entry(const std::string& key, const std::string& value) {
 
     // 记录偏移
     offsets.push_back(old_size);
+
+    return true;
 }
 
 // 从指定偏移量获取entry的key

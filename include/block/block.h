@@ -22,6 +22,7 @@ class Block : public::std::enable_shared_from_this<Block> {
 private:
 	std::vector<uint8_t> data;		// 存放数据
 	std::vector<uint16_t> offsets;  // 存放偏移量
+	size_t capacity;
 
 	struct Entry {
 		std::string key;
@@ -34,6 +35,7 @@ private:
 
 public:
 	Block() = default;
+	Block(size_t capacity) : capacity(capacity) {}
 
 	// 编码解码
 	std::vector<uint8_t> encode();
@@ -44,10 +46,14 @@ public:
 	size_t get_offset_at(size_t idx) const;
 
 	// 插入数据，查找数据
-	void add_entry(const std::string& key, const std::string& value);
+	bool add_entry(const std::string& key, const std::string& value);
 	std::optional<std::string> get_value_binary(const std::string& key);
 	
 	size_t size() const;
+	size_t cur_size() const {
+		return data.size() + offsets.size() * sizeof(uint16_t) + sizeof(uint16_t);
+	}
+	bool is_empty() const { return offsets.empty(); }
 
 	BlockIterator begin();
 	BlockIterator end();
