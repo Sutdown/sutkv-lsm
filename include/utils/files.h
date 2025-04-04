@@ -33,8 +33,7 @@ public:
 	void set_size(size_t size);
 
 	// 创建文件对象, 并写入到磁盘
-	static FileObj create_and_write(const std::string &path,
-																	std::vector<uint8_t> buf);
+	static FileObj create_and_write(const std::string &path, std::vector<uint8_t> buf);
 
 	// 打开文件对象
 	static FileObj open(const std::string &path);

@@ -61,6 +61,61 @@ std::shared_ptr<Block> Block::decode(const std::vector<uint8_t>& encoded) {
     return block;
 }
 
+std::shared_ptr<Block> Block::decode(const std::vector<uint8_t> &encoded,
+                                     bool with_hash)
+{
+    // 使用 make_shared 创建对象
+    auto block = std::make_shared<Block>();
+
+    // 1. 安全性检查
+    if (encoded.size() < sizeof(uint16_t))
+    {
+        throw std::runtime_error("Encoded data too small");
+    }
+
+    // 2. 读取元素个数
+    uint16_t num_elements;
+    size_t num_elements_pos = encoded.size() - sizeof(uint16_t);
+    if (with_hash)
+    {
+        num_elements_pos -= sizeof(uint32_t);
+        auto hash_pos = encoded.size() - sizeof(uint32_t);
+        uint32_t hash_value;
+        memcpy(&hash_value, encoded.data() + hash_pos, sizeof(uint32_t));
+
+        uint32_t compute_hash = std::hash<std::string_view>{}(
+            std::string_view(reinterpret_cast<const char *>(encoded.data()),
+                             encoded.size() - sizeof(uint32_t)));
+        if (hash_value != compute_hash)
+        {
+            throw std::runtime_error("Block hash verification failed");
+        }
+    }
+    memcpy(&num_elements, encoded.data() + num_elements_pos, sizeof(uint16_t));
+
+    // 3. 验证数据大小
+    size_t required_size = sizeof(uint16_t) + num_elements * sizeof(uint16_t);
+    if (encoded.size() < required_size)
+    {
+        throw std::runtime_error("Invalid encoded data size");
+    }
+
+    // 4. 计算各段位置
+    size_t offsets_section_start =
+        num_elements_pos - num_elements * sizeof(uint16_t);
+
+    // 5. 读取偏移数组
+    block->offsets.resize(num_elements);
+    memcpy(block->offsets.data(), encoded.data() + offsets_section_start,
+           num_elements * sizeof(uint16_t));
+
+    // 6. 复制数据段
+    block->data.reserve(offsets_section_start); // 优化内存分配
+    block->data.assign(encoded.begin(), encoded.begin() + offsets_section_start);
+
+    return block;
+}
+
 std::string Block::get_first_key() {
     if (data.empty() || offsets.empty()) {
         return "";
@@ -83,12 +138,7 @@ size_t Block::get_offset_at(size_t idx) const {
 }
 
 bool Block::add_entry(const std::string& key, const std::string& value) {
-    if ((cur_size() + key.size() + value.size() + 3 * sizeof(uint16_t) >
-         capacity) &&
-        !offsets.empty())
-    {
-        return false;
-    }
+    if ((cur_size() + key.size() + value.size() + 3 * sizeof(uint16_t) > capacity) && !offsets.empty()) { return false; }
     // 计算entry大小：key长度(2B) + key + value长度(2B) + value
     size_t entry_size = sizeof(uint16_t) + key.size() + sizeof(uint16_t) + value.size();
     size_t old_size = data.size();
