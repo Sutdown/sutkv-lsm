@@ -24,7 +24,7 @@ public:
 
 	// ++i
 	BlockIterator &operator++() {
-		if (block && current_index < block->size()) {
+		if (block && current_index < block->cur_size()) {
 			++current_index;
 			cached_value = std::nullopt; // Çå³ý»º´æ
 		}
@@ -53,7 +53,7 @@ public:
 	}
 
 	value_type operator*() const {
-		if (!block || current_index >= block->size()) {
+		if (!block || current_index >= block->cur_size()) {
 			throw std::out_of_range("Iterator out of range");
 		}
 

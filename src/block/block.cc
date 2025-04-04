@@ -183,10 +183,6 @@ Block::Entry Block::get_entry_at(size_t offset) const {
     return entry;
 }
 
-size_t Block::size() const { 
-    return offsets.size(); 
-}
-
 BlockIterator Block::begin() { 
     return BlockIterator(shared_from_this(), 0); 
 }

@@ -2,10 +2,12 @@
 #include "../include/block/block_iterator.h"
 #include <gtest/gtest.h>
 
-class BlockTest : public ::testing::Test {
+class BlockTest : public ::testing::Test
+{
 protected:
     // 预定义的编码数据
-    std::vector<uint8_t> getEncodedBlock() {
+    std::vector<uint8_t> getEncodedBlock()
+    {
         /*
         Block layout (3 entries):
         Entry1: key="apple", value="red"
@@ -45,7 +47,8 @@ protected:
 };
 
 // 测试解码
-TEST_F(BlockTest, DecodeTest) {
+TEST_F(BlockTest, DecodeTest)
+{
     auto encoded = getEncodedBlock();
     auto block = Block::decode(encoded);
 
@@ -59,8 +62,9 @@ TEST_F(BlockTest, DecodeTest) {
 }
 
 // 测试编码
-TEST_F(BlockTest, EncodeTest) {
-    Block block;
+TEST_F(BlockTest, EncodeTest)
+{
+    Block block(1024);
     block.add_entry("apple", "red");
     block.add_entry("banana", "yellow");
     block.add_entry("orange", "orange");
@@ -75,8 +79,9 @@ TEST_F(BlockTest, EncodeTest) {
 }
 
 // 测试二分查找
-TEST_F(BlockTest, BinarySearchTest) {
-    Block block;
+TEST_F(BlockTest, BinarySearchTest)
+{
+    Block block(1024);
     block.add_entry("apple", "red");
     block.add_entry("banana", "yellow");
     block.add_entry("orange", "orange");
@@ -92,8 +97,9 @@ TEST_F(BlockTest, BinarySearchTest) {
 }
 
 // 测试边界情况
-TEST_F(BlockTest, EdgeCasesTest) {
-    Block block;
+TEST_F(BlockTest, EdgeCasesTest)
+{
+    Block block(1024);
 
     // 空block
     EXPECT_EQ(block.get_first_key(), "");
@@ -112,12 +118,14 @@ TEST_F(BlockTest, EdgeCasesTest) {
 }
 
 // 测试大数据量
-TEST_F(BlockTest, LargeDataTest) {
-    Block block;
+TEST_F(BlockTest, LargeDataTest)
+{
+    Block block(1024 * 32);
     const int n = 1000;
 
     // 添加大量数据
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
+    {
         // 使用 std::format 或 sprintf 进行补零
         char key_buf[16];
         snprintf(key_buf, sizeof(key_buf), "key%03d", i); // 补零到3位
@@ -131,7 +139,8 @@ TEST_F(BlockTest, LargeDataTest) {
     }
 
     // 验证所有数据
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
+    {
         char key_buf[16];
         snprintf(key_buf, sizeof(key_buf), "key%03d", i);
         std::string key = key_buf;
@@ -145,9 +154,10 @@ TEST_F(BlockTest, LargeDataTest) {
 }
 
 // 测试错误处理
-TEST_F(BlockTest, ErrorHandlingTest) {
+TEST_F(BlockTest, ErrorHandlingTest)
+{
     // 测试解码无效数据
-    std::vector<uint8_t> invalid_data = { 1, 2, 3 }; // 太短
+    std::vector<uint8_t> invalid_data = {1, 2, 3}; // 太短
     EXPECT_THROW(Block::decode(invalid_data), std::runtime_error);
 
     // 测试空vector
@@ -156,9 +166,10 @@ TEST_F(BlockTest, ErrorHandlingTest) {
 }
 
 // 测试迭代器
-TEST_F(BlockTest, IteratorTest) {
+TEST_F(BlockTest, IteratorTest)
+{
     // 使用 make_shared 创建 Block
-    auto block = std::make_shared<Block>();
+    auto block = std::make_shared<Block>(4096);
 
     // 1. 测试空block的迭代器
     EXPECT_EQ(block->begin(), block->end());
@@ -167,7 +178,8 @@ TEST_F(BlockTest, IteratorTest) {
     const int n = 100;
     std::vector<std::pair<std::string, std::string>> test_data;
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
+    {
         char key_buf[16], value_buf[16];
         snprintf(key_buf, sizeof(key_buf), "key%03d", i);
         snprintf(value_buf, sizeof(value_buf), "value%03d", i);
@@ -178,7 +190,8 @@ TEST_F(BlockTest, IteratorTest) {
 
     // 3. 测试正向遍历和数据正确性
     size_t count = 0;
-    for (const auto& [key, value] : *block) { // 注意这里使用 *block
+    for (const auto &[key, value] : *block)
+    { // 注意这里使用 *block
         EXPECT_EQ(key, test_data[count].first);
         EXPECT_EQ(value, test_data[count].second);
         count++;
@@ -190,21 +203,23 @@ TEST_F(BlockTest, IteratorTest) {
     EXPECT_EQ((*it).first, "key000");
     ++it;
     EXPECT_EQ((*it).first, "key001");
-    it++;
+    ++it;
     EXPECT_EQ((*it).first, "key002");
 
     // 5. 测试编码后的迭代
     auto encoded = block->encode();
     auto decoded_block = Block::decode(encoded);
     count = 0;
-    for (const auto& [key, value] : *decoded_block) {
-        EXPECT_EQ(key, test_data[count].first);
-        EXPECT_EQ(value, test_data[count].second);
+    for (auto it = decoded_block->begin(); it != decoded_block->end(); ++it)
+    {
+        EXPECT_EQ((*it).first, test_data[count].first);
+        EXPECT_EQ((*it).second, test_data[count].second);
         count++;
     }
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
