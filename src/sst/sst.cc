@@ -1,4 +1,5 @@
 #include "../../include/sst/sst.h"
+#include "../../include/sst/sst_iterator.h"
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -6,7 +7,10 @@
 #include <functional>
 #include <stdexcept>
 
-/* SST */
+// **************************************************
+// SST
+// **************************************************
+
 std::shared_ptr<SST> SST::open(size_t sst_id, FileObj file)
 {
   auto sst = std::make_shared<SST>();
@@ -112,7 +116,8 @@ size_t SST::find_block_idx(const std::string &key)
   return left;
 }
 
-SstIterator SST::get(const std::string &key) {
+SstIterator SST::get(const std::string &key)
+{
   if (key < first_key || key > last_key)
   {
     return this->end();
@@ -141,7 +146,10 @@ SstIterator SST::end()
   return res;
 }
 
-/* SSTBuild */
+// **************************************************
+// SSTBuilder
+// **************************************************
+
 SSTBuilder::SSTBuilder(size_t block_size) : block(block_size)
 {
   // 初始化第一个block

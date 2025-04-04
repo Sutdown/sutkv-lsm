@@ -39,9 +39,7 @@ public:
 
 	// 编码解码
 	std::vector<uint8_t> encode();
-	static std::shared_ptr<Block> decode(const std::vector<uint8_t>& encoded);
-	static std::shared_ptr<Block> decode(const std::vector<uint8_t> &encoded,
-																			 bool with_hash = false);
+	static std::shared_ptr<Block> decode(const std::vector<uint8_t> &encoded, bool with_hash = false);
 	
 	// 获取数据
 	std::string get_first_key();

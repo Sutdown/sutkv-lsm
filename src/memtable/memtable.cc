@@ -1,17 +1,25 @@
 #include "../../include/memtable/memtable.h"
-#include "../../include/memtable/iterator.h"
+#include "../../include/consts.h"
+#include "../../include/iterator/iterator.h"
 #include "../../include/skiplist/skiplist.h"
+#include "../../include/sst/sst.h"
+#include <cstddef>
 #include <memory>
+#include <mutex>
 #include <optional>
+#include <shared_mutex>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 MemTable::MemTable() : frozen_bytes(0) {
 	current_table = std::make_shared<SkipList>();
 }
 MemTable::~MemTable() = default;
 
-void MemTable::put(const std::string& key, const std::string& value) {
+void MemTable::put(const std::string &key, const std::string &value)
+{
+	std::unique_lock<std::shared_mutex> lock(rx_mtx);
 	current_table->put(key, value);
 }
 
@@ -67,10 +75,67 @@ size_t MemTable::get_total_size() const {
 	return current_table->get_size() + get_frozen_size();
 }
 
-MemTableIterator MemTable::begin() const {
-	return MemTableIterator(*this);
+HeapIterator MemTable::begin()
+{
+	std::shared_lock<std::shared_mutex> slock(rx_mtx);
+	std::vector<SearchItem> item_vec;
+
+	for (auto iter = current_table->begin(); iter != current_table->end();
+			 iter++)
+	{
+		item_vec.emplace_back(iter.get_key(), iter.get_value(), 0);
+	}
+
+	int level = 1;
+	for (auto ft = frozen_tables.begin(); ft != frozen_tables.end(); ft++)
+	{
+		auto table = *ft;
+		for (auto iter = table->begin(); iter != table->end(); iter++)
+		{
+			item_vec.emplace_back(iter.get_key(), iter.get_value(), level);
+		}
+		level++;
+	}
+
+	return HeapIterator(item_vec);
 }
 
-MemTableIterator MemTable::end() const {
-	return MemTableIterator{};
+HeapIterator MemTable::end()
+{
+	std::shared_lock<std::shared_mutex> slock(rx_mtx);
+	return HeapIterator{};
+}
+
+// 将最老的 memtable 写入 SST, 并返回控制类
+std::shared_ptr<SST> MemTable::flush_last(SSTBuilder &builder, std::string &sst_path, size_t sst_id)
+{
+	// 由于 flush 后需要移除最老的 memtable, 因此需要加写锁
+	std::unique_lock<std::shared_mutex> lock(rx_mtx);
+
+	if (frozen_tables.empty())
+	{
+		// 如果当前表为空，直接返回nullptr
+		if (current_table->get_size() == 0)
+		{
+			return nullptr;
+		}
+		// 将当前表加入到frozen_tables头部
+		frozen_tables.push_front(current_table);
+		frozen_bytes += current_table->get_size();
+		// 创建新的空表作为当前表
+		current_table = std::make_shared<SkipList>();
+	}
+
+	// 将最老的 memtable 写入 SST
+	std::shared_ptr<SkipList> table = frozen_tables.back();
+	frozen_tables.pop_back();
+	frozen_bytes -= table->get_size();
+
+	std::vector<std::pair<std::string, std::string>> flush_data = table->flush();
+	for (auto &[k, v] : flush_data)
+	{
+		builder.add(k, v);
+	}
+	auto sst = builder.build(sst_id, sst_path);
+	return sst;
 }

@@ -1,18 +1,22 @@
 #ifndef MEMTABLE_H
 #define MEMTABLE_H
 
+#include "../iterator/iterator.h"
 #include "../skiplist/skiplist.h"
 #include <cstddef>
 #include <list>
 #include <memory>
+#include <mutex>
 #include <optional>
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 
-class MemTableIterator;
+class SST;
+class SSTBuilder;
 
 class MemTable {
-	friend class MemTableIterator;
+	friend class HeapIterator;
 
 public:
 	MemTable();
@@ -23,7 +27,7 @@ public:
 	void remove(const std::string& key);
 
 	void clear();
-	// void flush();
+	std::shared_ptr<SST> flush_last(SSTBuilder &builder, std::string &sst_path, size_t sst_id);
 
 	void frozen_cur_table();
 
@@ -31,12 +35,14 @@ public:
 	size_t get_frozen_size() const;
 	size_t get_total_size() const;
 
-	MemTableIterator begin() const;
-	MemTableIterator end() const;
+	HeapIterator begin();
+	HeapIterator end();
+
 private:
 	std::shared_ptr<SkipList> current_table; // Current table
 	std::list<std::shared_ptr<SkipList>> frozen_tables; // List of frozen tables
 	size_t frozen_bytes; // ͷ�巨
+	std::shared_mutex rx_mtx; // ??? SkipList ?????
 };
 
 #endif

@@ -26,41 +26,6 @@ std::vector<uint8_t> Block::encode() {
     return encoded;
 }
 
-std::shared_ptr<Block> Block::decode(const std::vector<uint8_t>& encoded) {
-    auto block = std::make_shared<Block>();
-
-    // 1. 安全性检查
-    if (encoded.size() < sizeof(uint16_t)) {
-        throw std::runtime_error("Encoded data too small");
-    }
-
-    // 2. 读取元素个数
-    uint16_t num_elements;
-    size_t num_elements_pos = encoded.size() - sizeof(uint16_t);
-    memcpy(&num_elements, encoded.data() + num_elements_pos, sizeof(uint16_t));
-
-    // 3. 验证数据大小
-    size_t required_size = sizeof(uint16_t) + num_elements * sizeof(uint16_t);
-    if (encoded.size() < required_size) {
-        throw std::runtime_error("Invalid encoded data size");
-    }
-
-    // 4. 计算各段位置
-    size_t offsets_section_start =
-        num_elements_pos - num_elements * sizeof(uint16_t);
-
-    // 5. 读取偏移数组
-    block->offsets.resize(num_elements);
-    memcpy(block->offsets.data(), encoded.data() + offsets_section_start,
-        num_elements * sizeof(uint16_t));
-
-    // 6. 复制数据段
-    block->data.reserve(offsets_section_start); // 优化内存分配
-    block->data.assign(encoded.begin(), encoded.begin() + offsets_section_start);
-
-    return block;
-}
-
 std::shared_ptr<Block> Block::decode(const std::vector<uint8_t> &encoded,
                                      bool with_hash)
 {
