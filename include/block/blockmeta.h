@@ -19,8 +19,8 @@ class BlockMeta {
 	friend class BlockMetaTest;
 public:
 	size_t offset; // 块在文件中的偏移量
-	std::string first_key;
-	std::string last_key;
+	std::string first_key; // 块中第一个key
+	std::string last_key;  // 块中最后一个key
 
 	static void encode_meta_to_slice(std::vector<BlockMeta>& meta_entries, std::vector<uint8_t>& metadata) {
 		// 1 计算总大小
