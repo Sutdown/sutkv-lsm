@@ -39,7 +39,6 @@ public:
 
 	std::string get_first_key() const;
 	std::string get_last_key() const;
-
 };
 
 // 构建SST文件的类

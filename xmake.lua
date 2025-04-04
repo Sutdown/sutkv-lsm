@@ -22,6 +22,11 @@ target("block")
     add_files("src/block/*.cc")
     add_includedirs("include", {public = true})
 
+target("utils")
+    set_kind("static")  -- 生成静态库
+    add_files("src/utils/*.cc")
+    add_includedirs("include", {public = true})
+
 -- 定义测试
 target("test_skiplist")
     set_kind("binary")  -- 生成可执行文件
@@ -50,3 +55,10 @@ target("test_blockmeta")
     add_deps("block")  -- 如果memtable是独立的target，这里需要添加对应的依赖
     add_packages("gtest")
     add_includedirs("include") 
+
+target("test_utils")
+    set_kind("binary")
+    add_files("test/test_utils.cc")
+    add_deps("utils")
+    add_packages("gtest")
+    add_includedirs("include")

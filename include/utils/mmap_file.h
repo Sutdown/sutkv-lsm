@@ -1,3 +1,10 @@
+#pragma once
+
+#include <cstddef>
+#include <fcntl.h>
+#include <string>
+#include <sys/mman.h>
+#include <unistd.h>
 /*
 * 内存映射
 * 按需加载
@@ -18,10 +25,10 @@ public:
 	MmapFile() :fd_(-1), file_size_(0), mmaped_data_(nullptr) {}
 	~MmapFile() { close(); }
 
-	bool open(const std::string& filename, bool create = false);
-	bool create_and_map(const std::string& path, size_t size);
-
+	bool open(const std::string& filename, bool create = false); // 打开文件
+	bool create_and_map(const std::string& path, size_t size); // 创建
 	void close();
+
 	void* data() const { return mmaped_data_; }
 	size_t size() const { return file_size_; }
 
