@@ -49,4 +49,4 @@ target("test_blockmeta")
     add_files("test/test_blockmeta.cc")
     add_deps("block")  -- 如果memtable是独立的target，这里需要添加对应的依赖
     add_packages("gtest")
-    add_includedirs("include")
+    add_includedirs("include") 
