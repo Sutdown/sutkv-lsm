@@ -18,7 +18,7 @@ private:
 	void* mmaped_data_; // 映射的内存指针
 	std::string filename_; // 文件名
 
-	mapFile(const MmapFile&) = delete;
+	MmapFile(const MmapFile&) = delete;
 	MmapFile& operator=(const MmapFile&) = delete;
 
 public:

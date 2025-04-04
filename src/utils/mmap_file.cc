@@ -10,7 +10,7 @@ bool MmapFile::open(const std::string& filename, bool create) {
 	int flags = O_RDWR;
 	if (create) { flags |= O_CREAT; }
 
-	fd_ = open(filename_.c_str(), flags, 0644);
+	fd_ = ::open(filename_.c_str(), flags, 0644);
 	if (fd_ = -1) { return false; }
 
 	// 获取文件大小
@@ -33,7 +33,7 @@ bool MmapFile::open(const std::string& filename, bool create) {
 }
 
 void MmapFile::close() {
-	if (mmapped_data_ != nullptr && mmaped_data_ != MAP_FAILED) {
+	if (mmaped_data_ != nullptr && mmaped_data_ != MAP_FAILED) {
 		munmap(mmaped_data_, file_size_);
 		mmaped_data_ = nullptr;
 	}
@@ -47,7 +47,7 @@ void MmapFile::close() {
 }
 
 bool MmapFile::create_and_map(const std::string& path, size_t size) {
-	fd_ = open(path.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0644);
+	fd_ = ::open(path.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0644);
 	if (fd_ == -1) {
 		return false;
 	}
@@ -57,8 +57,8 @@ bool MmapFile::create_and_map(const std::string& path, size_t size) {
 		return false;
 	}
 		
-	mapped_data_ = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd_, 0);
-	if (mapped_data_ == MAP_FAILED) {
+	mmaped_data_ = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd_, 0);
+	if (mmaped_data_ == MAP_FAILED) {
 		close();
 		return false;
 	}
@@ -84,7 +84,7 @@ bool MmapFile::write(const void* data, size_t size) {
 
 	// 解除内存映射
 	if (mmaped_data_ != nullptr && mmaped_data_ != MAP_FAILED) {
-		munmap(mapped_data_, file_size_);
+		munmap(mmaped_data_, file_size_);
 	}
 
 	// 重新映射

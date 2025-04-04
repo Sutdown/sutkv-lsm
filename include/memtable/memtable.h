@@ -9,6 +9,8 @@
 #include <string>
 #include <unordered_map>
 
+class MemTableIterator;
+
 class MemTable {
 	friend class MemTableIterator;
 

@@ -31,5 +31,5 @@ std::vector<uint8_t> FileObj::read_to_slice(size_t offset, size_t len) const {
 	const uint8_t* data = static_cast<const uint8_t*>(mmap_file->data());
 	memcpy(res.data(), data + offset, len);
 
-	return data;
+	return res;
 }
