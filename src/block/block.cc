@@ -194,30 +194,46 @@ int Block::compare_key_at(size_t offset, const std::string& target) const {
 
 // 使用二分查找获取value
 // 要求在插入数据时有序插入
-std::optional<std::string> Block::get_value_binary(const std::string& key) {
-    if (offsets.empty()) {
+std::optional<std::string> Block::get_value_binary(const std::string &key)
+{
+    auto idx = get_idx_binary(key);
+    if (!idx.has_value())
+    {
         return std::nullopt;
     }
 
+    return get_value_at(offsets[*idx]);
+}
+
+std::optional<size_t> Block::get_idx_binary(const std::string &key)
+{
+    if (offsets.empty())
+    {
+        return std::nullopt;
+    }
     // 二分查找
     int left = 0;
     int right = offsets.size() - 1;
 
-    while (left <= right) {
+    while (left <= right)
+    {
         int mid = left + (right - left) / 2;
         size_t mid_offset = offsets[mid];
 
         int cmp = compare_key_at(mid_offset, key);
 
-        if (cmp == 0) {
+        if (cmp == 0)
+        {
             // 找到key，返回对应的value
-            return get_value_at(mid_offset);
+            return mid;
         }
-        else if (cmp < 0) {
+        else if (cmp < 0)
+        {
             // 中间的key小于目标key，查找右半部分
             left = mid + 1;
         }
-        else {
+        else
+        {
             // 中间的key大于目标key，查找左半部分
             right = mid - 1;
         }

@@ -50,7 +50,8 @@ public:
 	// 插入数据，查找数据
 	bool add_entry(const std::string& key, const std::string& value);
 	std::optional<std::string> get_value_binary(const std::string& key);
-	
+	std::optional<size_t> get_idx_binary(const std::string &key);
+
 	size_t cur_size() const {
 		return data.size() + offsets.size() * sizeof(uint16_t) + sizeof(uint16_t);
 	}
