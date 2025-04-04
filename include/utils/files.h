@@ -7,35 +7,38 @@
 #include <string>
 #include <vector>
 
-class FileObj {
+class FileObj
+{
 private:
-	std::unique_ptr<MmapFile> mmap_file;
+	std::unique_ptr<MmapFile> m_file;
 	size_t m_size;
 
 public:
-	FileObj():mmap_file(std::make_unique<MmapFile>()) {}
-	~FileObj() = default;
+	FileObj();
+	~FileObj();
 
-	FileObj(const FileObj&) = delete;
-	FileObj& operator=(const FileObj&) = delete;
+	// 禁用拷贝
+	FileObj(const FileObj &) = delete;
+	FileObj &operator=(const FileObj &) = delete;
 
-	FileObj(FileObj&& other) noexcept : mmap_file(std::move(other.mmap_file)), m_size(other.m_size) {
-		other.m_size = 0;
-	}
-	FileObj& operator=(FileObj&& other) noexcept {
-		if (this != &other) {
-			mmap_file = std::move(other.mmap_file);
-			m_size = other.m_size;
-			other.m_size = 0;
-		}
-		return *this;
-	}
+	// 实现移动语义
+	FileObj(FileObj &&other) noexcept;
 
-	size_t size() const { return mmap_file->size(); }
+	FileObj &operator=(FileObj &&other) noexcept;
 
-	void set_size(size_t size) { m_size = size; }
+	// 文件大小
+	size_t size() const;
 
-	static FileObj create_and_write(const std::string& path, const std::vector<uint8_t>& data);
-	static FileObj open(const std::string& path);
-	std::vector<uint8_t> read_to_slice(size_t offset, size_t len) const;
+	// 设置文件大小
+	void set_size(size_t size);
+
+	// 创建文件对象, 并写入到磁盘
+	static FileObj create_and_write(const std::string &path,
+																	std::vector<uint8_t> buf);
+
+	// 打开文件对象
+	static FileObj open(const std::string &path);
+
+	// 读取并返回切片
+	std::vector<uint8_t> read_to_slice(size_t offset, size_t length);
 };
