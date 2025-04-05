@@ -31,9 +31,9 @@ public:
 
 	void frozen_cur_table();
 
-	size_t get_cur_size() const;
-	size_t get_frozen_size() const;
-	size_t get_total_size() const;
+	size_t get_cur_size();
+	size_t get_frozen_size();
+	size_t get_total_size();
 
 	HeapIterator begin();
 	HeapIterator end();
@@ -42,7 +42,7 @@ private:
 	std::shared_ptr<SkipList> current_table; // Current table
 	std::list<std::shared_ptr<SkipList>> frozen_tables; // List of frozen tables
 	size_t frozen_bytes; // Í·²å·¨
-	std::shared_mutex rx_mtx; // ??? SkipList ?????
+	std::shared_mutex rx_mtx; // ¶ÁÐ´Ëø
 };
 
 #endif

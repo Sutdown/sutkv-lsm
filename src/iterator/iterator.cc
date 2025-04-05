@@ -1,11 +1,10 @@
 #include "../../include/iterator/iterator.h"
 #include <vector>
 
-// *************************** SearchItem ***************************
+/*searchitem*/
 bool operator<(const SearchItem &a, const SearchItem &b)
 {
-  if (a.key != b.key)
-  {
+  if (a.key != b.key) {
     return a.key < b.key;
   }
   return a.idx < b.idx;
@@ -13,8 +12,7 @@ bool operator<(const SearchItem &a, const SearchItem &b)
 
 bool operator>(const SearchItem &a, const SearchItem &b)
 {
-  if (a.key != b.key)
-  {
+  if (a.key != b.key){
     return a.key > b.key;
   }
   return a.idx > b.idx;
@@ -25,7 +23,7 @@ bool operator==(const SearchItem &a, const SearchItem &b)
   return a.idx == b.idx && a.key == b.key;
 }
 
-// *************************** HeapIterator ***************************
+/*heap iterator*/
 HeapIterator::HeapIterator(std::vector<SearchItem> item_vec)
 {
   for (auto &item : item_vec)
