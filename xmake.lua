@@ -95,3 +95,10 @@ target("test_lsm")
     add_deps("lsm", "memtable", "iterator")  -- Added memtable and iterator dependencies
     add_packages("gtest")
     add_includedirs("include")
+
+target("test_blockcache")
+    set_kind("binary")
+    add_files("test/test_blockcache.cc")
+    add_deps("block")
+    add_packages("gtest")
+    add_includedirs("include")
