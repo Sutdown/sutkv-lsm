@@ -196,9 +196,7 @@ TEST_F(SSTTest, LargeSST)
     EXPECT_TRUE(value.has_value());
 
     // 构造期望的value
-    std::string expected_value =
-        "val" + std::string(3 - std::to_string(i).length(), '0') +
-        std::to_string(i);
+    std::string expected_value = "val" + std::string(3 - std::to_string(i).length(), '0') + std::to_string(i);
     EXPECT_EQ(*value, expected_value);
   }
 }

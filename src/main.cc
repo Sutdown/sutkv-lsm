@@ -39,10 +39,10 @@ int main()
   }
 
   // 遍历所有数据
-  std::cout << "All key-value pairs:" << std::endl;
+  /*std::cout << "All key-value pairs:" << std::endl;
   for (auto it = lsm.begin(); it != lsm.end(); ++it) {
      std::cout << it->first << ": " << it->second << std::endl;
-  }
+  }*/
 
   return 0;
 }

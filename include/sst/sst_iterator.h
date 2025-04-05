@@ -10,13 +10,19 @@ class SstIterator
 {
   friend SST;
 
+  using value_type = std::pair<std::string, std::string>;
+  using pointer = value_type *;
+  using reference = value_type &;
+
 private:
   std::shared_ptr<SST> m_sst;
   size_t m_block_idx;
   std::shared_ptr<BlockIterator> m_block_it;
+  mutable std::optional<value_type> cached_value;
+
+  void update_current() const;
 
 public:
-  using value_type = std::pair<std::string, std::string>;
 
   // 创建迭代器, 并移动到第一个key
   SstIterator(std::shared_ptr<SST> sst);
@@ -34,4 +40,5 @@ public:
   bool operator==(const SstIterator &other) const;
   bool operator!=(const SstIterator &other) const;
   value_type operator*() const;
+  pointer operator->() const;
 };

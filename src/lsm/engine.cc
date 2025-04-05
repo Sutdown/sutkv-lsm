@@ -75,9 +75,9 @@ std::optional<std::string> LSMEngine::get(const std::string &key)
     auto sst = ssts[sst_id];
     auto sst_iterator = sst->get(key);
     if (sst_iterator != sst->end()) {
-      if ((*sst_iterator).second.size() > 0) {
+      if ((sst_iterator)->second.size() > 0) {
         // 值存在且不为空
-        return (*sst_iterator).second;
+        return sst_iterator->second;
       } else {
         // 空值表示被删除
         return std::nullopt;
