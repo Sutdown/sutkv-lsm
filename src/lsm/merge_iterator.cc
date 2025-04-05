@@ -11,12 +11,10 @@ MergeIterator::MergeIterator(HeapIterator it_a, HeapIterator it_b)
 
 bool MergeIterator::choose_it_a()
 {
-  if (it_a.is_end())
-  {
+  if (it_a.is_end()) {
     return false;
   }
-  if (it_b.is_end())
-  {
+  if (it_b.is_end()) {
     return true;
   }
   return (*it_a).first < (*it_b).first; // 比较 key
@@ -24,8 +22,7 @@ bool MergeIterator::choose_it_a()
 
 void MergeIterator::skip_it_b()
 {
-  if (!it_a.is_end() && !it_b.is_end() && (*it_b).first == (*it_a).first)
-  {
+  if (!it_a.is_end() && !it_b.is_end() && (*it_b).first == (*it_a).first) {
     ++it_b;
   }
 }
@@ -34,24 +31,18 @@ bool MergeIterator::is_end() const { return it_a.is_end() && it_b.is_end(); }
 
 std::pair<std::string, std::string> MergeIterator::operator*() const
 {
-  if (choose_a)
-  {
+  if (choose_a) {
     return *it_a;
-  }
-  else
-  {
+  } else {
     return *it_b;
   }
 }
 
 MergeIterator &MergeIterator::operator++()
 {
-  if (choose_a)
-  {
+  if (choose_a) {
     ++it_a;
-  }
-  else
-  {
+  } else {
     ++it_b;
   }
   skip_it_b();              // 跳过重复的 key
