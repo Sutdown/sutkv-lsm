@@ -7,8 +7,7 @@
 class BlockCacheTest : public ::testing::Test
 {
 protected:
-  void SetUp() override
-  {
+  void SetUp() override {
     // 初始化缓存池，容量为3，K值为2
     cache = std::make_unique<BlockCache>(3, 2);
   }

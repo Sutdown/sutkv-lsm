@@ -33,6 +33,5 @@ public:
   virtual bool is_end() const;
 
 private:
-  std::priority_queue<SearchItem, std::vector<SearchItem>, std::greater<SearchItem>>
-      items;
+  std::priority_queue<SearchItem, std::vector<SearchItem>, std::greater<SearchItem>> items;
 };

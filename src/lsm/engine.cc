@@ -140,16 +140,20 @@ std::string LSMEngine::get_sst_path(size_t sst_id)
 MergeIterator LSMEngine::begin()
 {
   std::vector<SearchItem> item_vec;
+  std::shared_lock<std::shared_mutex> lock(ssts_mtx);
   for (auto &sst_id : l0_sst_ids) {
     auto sst = ssts[sst_id];
     for (auto iter = sst->begin(); iter != sst->end(); ++iter) {
       item_vec.emplace_back(iter.key(), iter.value(), sst_id);
     }
   }
+  // item_vec l0层中SST中的每对检查项
+  // l0_iter是l0层的迭代器，用来合并
   HeapIterator l0_iter(item_vec);
 
-  auto mem_iter = memtable.begin();
+  auto mem_iter = memtable.begin(); // memtable的迭代器
 
+  // 合并l0层和memtable的迭代器
   return MergeIterator(mem_iter, l0_iter);
 }
 

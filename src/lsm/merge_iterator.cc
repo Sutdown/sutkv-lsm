@@ -59,3 +59,18 @@ bool MergeIterator::operator!=(const MergeIterator &other) const
 {
   return !(*this == other);
 }
+
+MergeIterator::pointer MergeIterator::operator->() const
+{
+  update_current();
+  return current.get();
+}
+
+void MergeIterator::update_current() const
+{
+  if (choose_a) {
+    current = std::make_shared<value_type>(*it_a);
+  } else {
+    current = std::make_shared<value_type>(*it_b);
+  }
+}
