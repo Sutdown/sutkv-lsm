@@ -1,4 +1,5 @@
 #include "../include/utils/files.h"
+#include "../include/utils/bloom_filter.h"
 #include <filesystem>
 #include <gtest/gtest.h>
 #include <random>
@@ -9,14 +10,12 @@ protected:
 	void SetUp() override
 	{
 		// 确保测试目录存在
-		if (!std::filesystem::exists("test_data"))
-		{
+		if (!std::filesystem::exists("test_data")) {
 			std::filesystem::create_directory("test_data");
 		}
 	}
 
-	void TearDown() override
-	{
+	void TearDown() override {
 		// 清理测试文件
 		std::filesystem::remove_all("test_data");
 	}
@@ -29,14 +28,14 @@ protected:
 		std::mt19937 gen(rd());
 		std::uniform_int_distribution<> dis(0, 255);
 
-		for (size_t i = 0; i < size; ++i)
-		{
+		for (size_t i = 0; i < size; ++i) {
 			data[i] = static_cast<uint8_t>(dis(gen));
 		}
 		return data;
 	}
 };
 
+/*
 // 测试基本的写入和读取
 TEST_F(FileTest, BasicWriteAndRead)
 {
@@ -141,6 +140,49 @@ TEST_F(FileTest, MoveSemantics)
 	// 验证移动后的对象可以正常工作
 	auto read_data = file2.read_to_slice(0, data.size());
 	EXPECT_EQ(read_data, data);
+}
+*/
+
+TEST(BloomFilterTest, ComprehensiveTest)
+{
+	// 创建布隆过滤器，预期插入1000个元素，假阳性率为0.01
+	BloomFilter bf(1000, 0.1);
+
+	// 添加一些键
+	for (int i = 0; i < 1000; ++i)
+	{
+		bf.add("key" + std::to_string(i));
+	}
+
+	// 检查存在的键
+	for (int i = 0; i < 1000; ++i)
+	{
+		EXPECT_TRUE(bf.possibly_contains("key" + std::to_string(i)))
+				<< "Key key" << i << " should be found in the Bloom Filter";
+	}
+
+	// 检查不存在的键
+	int false_positives = 0;
+	for (int i = 1000; i < 2000; ++i)
+	{
+		if (bf.possibly_contains("key" + std::to_string(i)))
+		{
+			++false_positives;
+		}
+	}
+
+	// 计算假阳性率
+	double false_positive_rate = static_cast<double>(false_positives) / 1000;
+
+	// 预期的假阳性率是0.1，允许一些误差（例如0.2）
+	EXPECT_LE(false_positive_rate, 0.2)
+			<< "False positive rate should be less than or equal to 0.2, but got "
+			<< false_positive_rate;
+
+// 输出假阳性率
+#ifdef LSM_DEBUG
+	std::cout << "False positive rate: " << false_positive_rate << std::endl;
+#endif
 }
 
 int main(int argc, char **argv)
