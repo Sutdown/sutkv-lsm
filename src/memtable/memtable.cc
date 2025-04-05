@@ -117,7 +117,7 @@ HeapIterator MemTable::end()
 }
 
 // 将最老的 memtable 写入 SST, 并返回控制类
-std::shared_ptr<SST> MemTable::flush_last(SSTBuilder &builder, std::string &sst_path, size_t sst_id)
+std::shared_ptr<SST> MemTable::flush_last(SSTBuilder &builder, std::string &sst_path, size_t sst_id, std::shared_ptr<BlockCache> block_cache)
 {
 	// 由于 flush 后需要移除最老的 memtable, 因此需要加写锁
 	std::unique_lock<std::shared_mutex> lock(rx_mtx);
@@ -146,6 +146,6 @@ std::shared_ptr<SST> MemTable::flush_last(SSTBuilder &builder, std::string &sst_
 	{
 		builder.add(k, v);
 	}
-	auto sst = builder.build(sst_id, sst_path);
+	auto sst = builder.build(sst_id, sst_path, block_cache);
 	return sst;
 }

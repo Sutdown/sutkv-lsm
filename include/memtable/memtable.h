@@ -12,6 +12,8 @@
 #include <string>
 #include <unordered_map>
 
+// ??????????????
+class BlockCache;
 class SST;
 class SSTBuilder;
 
@@ -27,7 +29,8 @@ public:
 	void remove(const std::string& key);
 
 	void clear();
-	std::shared_ptr<SST> flush_last(SSTBuilder &builder, std::string &sst_path, size_t sst_id);
+	std::shared_ptr<SST> flush_last(SSTBuilder &builder, std::string &sst_path,
+																	size_t sst_id, std::shared_ptr<BlockCache> block_cache);
 
 	void frozen_cur_table();
 
@@ -41,8 +44,8 @@ public:
 private:
 	std::shared_ptr<SkipList> current_table; // Current table
 	std::list<std::shared_ptr<SkipList>> frozen_tables; // List of frozen tables
-	size_t frozen_bytes; // Í·²å·¨
-	std::shared_mutex rx_mtx; // ¶ÁÐ´Ëø
+	size_t frozen_bytes; 
+	std::shared_mutex rx_mtx; 
 };
 
 #endif

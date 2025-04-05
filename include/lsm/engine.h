@@ -17,7 +17,8 @@ public:
   std::unordered_map<size_t, std::shared_ptr<SST>> ssts; // SST ID -> SST对象的映射
 
   std::shared_mutex ssts_mtx;
-  
+  std::shared_ptr<BlockCache> block_cache;
+
   LSMEngine(std::string path);
   ~LSMEngine();
 

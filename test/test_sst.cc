@@ -1,3 +1,4 @@
+#include "../include/consts.h"
 #include "../include/sst/sst.h"
 #include <filesystem>
 #include <gtest/gtest.h>
@@ -32,7 +33,10 @@ protected:
       builder.add(key, value);
     }
 
-    return builder.build(1, "test_data/test.sst");
+    auto block_cache = std::make_shared<BlockCache>(LSMmm_BLOCK_CACHE_CAPACITY,
+                                                    LSMmm_BLOCK_CACHE_K);
+
+    return builder.build(1, "test_data/test.sst", block_cache);
   }
 };
 
@@ -40,6 +44,8 @@ protected:
 TEST_F(SSTTest, BasicWriteAndRead)
 {
   SSTBuilder builder(1024); // 1KB block size
+  auto block_cache = std::make_shared<BlockCache>(LSMmm_BLOCK_CACHE_CAPACITY,
+                                                  LSMmm_BLOCK_CACHE_K);
 
   // 添加一些数据
   builder.add("key1", "value1");
@@ -47,7 +53,7 @@ TEST_F(SSTTest, BasicWriteAndRead)
   builder.add("key3", "value3");
 
   // 构建SST
-  auto sst = builder.build(1, "test_data/basic.sst");
+  auto sst = builder.build(1, "test_data/basic.sst", block_cache);
 
   // 验证基本属性
   EXPECT_EQ(sst->get_first_key(), "key1");
@@ -68,6 +74,8 @@ TEST_F(SSTTest, BlockSplitting)
 {
   // 使用小的block size强制分裂
   SSTBuilder builder(64); // 很小的block size
+  auto block_cache = std::make_shared<BlockCache>(LSMmm_BLOCK_CACHE_CAPACITY,
+                                                  LSMmm_BLOCK_CACHE_K);
 
   // 添加足够多的数据以触发分裂
   for (int i = 0; i < 10; i++)
@@ -77,7 +85,7 @@ TEST_F(SSTTest, BlockSplitting)
     builder.add(key, value);
   }
 
-  auto sst = builder.build(1, "test_data/split.sst");
+  auto sst = builder.build(1, "test_data/split.sst", block_cache);
 
   // 验证有多个block
   EXPECT_GT(sst->num_blocks(), 1);
@@ -123,7 +131,10 @@ TEST_F(SSTTest, Metadata)
 TEST_F(SSTTest, EmptySST)
 {
   SSTBuilder builder(1024);
-  EXPECT_THROW(builder.build(1, "test_data/empty.sst"), std::runtime_error);
+  auto block_cache = std::make_shared<BlockCache>(LSMmm_BLOCK_CACHE_CAPACITY,
+                                                  LSMmm_BLOCK_CACHE_K);
+  EXPECT_THROW(builder.build(1, "test_data/empty.sst", block_cache),
+               std::runtime_error);
 }
 
 // 测试SST重新打开
@@ -131,10 +142,12 @@ TEST_F(SSTTest, ReopenSST)
 {
   // 首先创建一个SST
   auto sst = create_test_sst(256, 10);
+  auto block_cache = std::make_shared<BlockCache>(LSMmm_BLOCK_CACHE_CAPACITY,
+                                                  LSMmm_BLOCK_CACHE_K);
 
   // 重新打开SST
   FileObj file = FileObj::open("test_data/test.sst");
-  auto reopened_sst = SST::open(1, std::move(file));
+  auto reopened_sst = SST::open(1, std::move(file), block_cache);
 
   // 验证数据一致性
   EXPECT_EQ(sst->get_first_key(), reopened_sst->get_first_key());
@@ -146,6 +159,8 @@ TEST_F(SSTTest, ReopenSST)
 TEST_F(SSTTest, LargeSST)
 {
   SSTBuilder builder(4096); // 4KB blocks
+  auto block_cache = std::make_shared<BlockCache>(LSMmm_BLOCK_CACHE_CAPACITY,
+                                                  LSMmm_BLOCK_CACHE_K);
 
   // 添加大量数据
   for (int i = 0; i < 1000; i++)
@@ -162,7 +177,7 @@ TEST_F(SSTTest, LargeSST)
     builder.add(key, value);
   }
 
-  auto sst = builder.build(1, "test_data/large.sst");
+  auto sst = builder.build(1, "test_data/large.sst", block_cache);
 
   // 验证数据完整性
   EXPECT_GT(sst->num_blocks(), 1);

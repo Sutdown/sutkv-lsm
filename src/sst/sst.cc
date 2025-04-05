@@ -11,11 +11,12 @@
 // SST
 // **************************************************
 
-std::shared_ptr<SST> SST::open(size_t sst_id, FileObj file)
+std::shared_ptr<SST> SST::open(size_t sst_id, FileObj file, std::shared_ptr<BlockCache> block_cache)
 {
   auto sst = std::make_shared<SST>();
   sst->sst_id = sst_id;
   sst->file = std::move(file);
+  sst->block_cache = block_cache;
 
   // 读取文件末尾的元数据块
   // 1. 读取元数据块的偏移量（最后8字节）
@@ -25,8 +26,7 @@ std::shared_ptr<SST> SST::open(size_t sst_id, FileObj file)
     throw std::runtime_error("Invalid SST file: too small");
   }
 
-  auto offset_bytes =
-      sst->file.read_to_slice(file_size - sizeof(uint32_t), sizeof(uint32_t));
+  auto offset_bytes = sst->file.read_to_slice(file_size - sizeof(uint32_t), sizeof(uint32_t));
   memcpy(&sst->meta_block_offset, offset_bytes.data(), sizeof(uint32_t));
 
   // 2. 读取并解码元数据块
@@ -46,8 +46,7 @@ std::shared_ptr<SST> SST::open(size_t sst_id, FileObj file)
 
 std::shared_ptr<SST>
 SST::create_sst_with_meta_only(size_t sst_id, size_t file_size,
-                               const std::string &first_key,
-                               const std::string &last_key)
+                               const std::string &first_key, const std::string &last_key, std::shared_ptr<BlockCache> block_cache)
 {
   auto sst = std::make_shared<SST>();
   sst->file.set_size(file_size);
@@ -55,6 +54,7 @@ SST::create_sst_with_meta_only(size_t sst_id, size_t file_size,
   sst->first_key = first_key;
   sst->last_key = last_key;
   sst->meta_block_offset = 0;
+  sst->block_cache = block_cache;
 
   return sst;
 }
@@ -95,22 +95,16 @@ size_t SST::find_block_idx(const std::string &key)
     size_t mid = (left + right) / 2;
     const auto &meta = meta_entries[mid];
 
-    if (key < meta.first_key)
-    {
+    if (key < meta.first_key) {
       right = mid;
-    }
-    else if (key > meta.last_key)
-    {
+    } else if (key > meta.last_key) {
       left = mid + 1;
-    }
-    else
-    {
+    } else {
       return mid;
     }
   }
 
-  if (left >= meta_entries.size())
-  {
+  if (left >= meta_entries.size()) {
     throw std::runtime_error("Key not found in any block");
   }
   return left;
@@ -118,8 +112,7 @@ size_t SST::find_block_idx(const std::string &key)
 
 SstIterator SST::get(const std::string &key)
 {
-  if (key < first_key || key > last_key)
-  {
+  if (key < first_key || key > last_key) {
     return this->end();
   }
 
@@ -146,10 +139,7 @@ SstIterator SST::end()
   return res;
 }
 
-// **************************************************
-// SSTBuilder
-// **************************************************
-
+/* SSTBuilder */
 SSTBuilder::SSTBuilder(size_t block_size) : block(block_size)
 {
   // 初始化第一个block
@@ -201,25 +191,22 @@ void SSTBuilder::finish_block()
                        encoded_block.size())));
 
   // 预分配空间并添加数据
-  data.reserve(data.size() + encoded_block.size() +
-               sizeof(uint32_t)); // 加上的是哈希值
+  data.reserve(data.size() + encoded_block.size() + sizeof(uint32_t)); // 加上的是哈希值
   data.insert(data.end(), encoded_block.begin(), encoded_block.end());
   data.resize(data.size() + sizeof(uint32_t));
   memcpy(data.data() + data.size() - sizeof(uint32_t), &block_hash,
          sizeof(uint32_t));
 }
 
-std::shared_ptr<SST> SSTBuilder::build(size_t sst_id, const std::string &path)
+std::shared_ptr<SST> SSTBuilder::build(size_t sst_id, const std::string &path, std::shared_ptr<BlockCache> block_cache)
 {
   // 完成最后一个block
-  if (!block.is_empty())
-  {
+  if (!block.is_empty()) {
     finish_block();
   }
 
   // 如果没有数据，抛出异常
-  if (meta_entries.empty())
-  {
+  if (meta_entries.empty()) {
     throw std::runtime_error("Cannot build empty SST");
   }
 
@@ -254,6 +241,7 @@ std::shared_ptr<SST> SSTBuilder::build(size_t sst_id, const std::string &path)
   res->last_key = meta_entries.back().last_key;
   res->meta_block_offset = meta_offset;
   res->meta_entries = std::move(meta_entries);
+  res->block_cache = block_cache;
 
   return res;
 }
