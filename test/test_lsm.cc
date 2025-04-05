@@ -82,12 +82,9 @@ TEST_F(LSMTest, Persistence)
   for (int i = 0; i < num; ++i)
   {
     std::string key = "key" + std::to_string(i);
-    if (kvs.find(key) != kvs.end())
-    {
+    if (kvs.find(key) != kvs.end()) {
       EXPECT_EQ(lsm.get(key).value(), kvs[key]);
-    }
-    else
-    {
+    } else {
       EXPECT_FALSE(lsm.get(key).has_value());
     }
   }

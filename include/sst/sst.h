@@ -11,29 +11,6 @@
 
 class SstIterator;
 
-/**
- * SST文件的结构, 参考自 https://skyzh.github.io/mini-lsm/week1-04-sst.html
- * ------------------------------------------------------------------------
- * |         Block Section         |  Meta Section | Extra                |
- * ------------------------------------------------------------------------
- * | data block | ... | data block |    metadata   | metadata offset (32) |
- * ------------------------------------------------------------------------
-
- * 其中, metadata 是一个数组加上一些描述信息, 数组每个元素由一个 BlockMeta
- 编码形成 MetaEntry, MetaEntry 结构如下:
- * ---------------------------------------------------------------------------------------------------
- * | offset(32) | 1st_key_len(16) | 1st_key(1st_key_len) | last_key_len(16) |
- last_key(last_key_len) |
- * ---------------------------------------------------------------------------------------------------
-
- * Meta Section 的结构如下:
- * ---------------------------------------------------------------
- * | num_entries (32) | MetaEntry | ... | MetaEntry | Hash (32) |
- * ---------------------------------------------------------------
- * 其中, num_entries 表示 metadata 数组的长度, Hash 是 metadata
- 数组的哈希值(只包括数组部分, 不包括 num_entries ), 用于校验 metadata 的完整性
- */
-
 class SST : public std::enable_shared_from_this<SST>
 {
 	friend class SSTBuilder;
@@ -50,10 +27,8 @@ public:
 	// 从文件中打开sst
 	static std::shared_ptr<SST> open(size_t sst_id, FileObj file);
 	// 创建一个sst, 只包含首尾key的元数据
-	static std::shared_ptr<SST>
-	create_sst_with_meta_only(size_t sst_id, size_t file_size,
-														const std::string &first_key,
-														const std::string &last_key);
+	static std::shared_ptr<SST> create_sst_with_meta_only(size_t sst_id, size_t file_size,
+														const std::string &first_key, const std::string &last_key);
 	// 根据索引读取block
 	std::shared_ptr<Block> read_block(size_t block_idx);
 
