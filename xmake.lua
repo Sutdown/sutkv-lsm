@@ -5,6 +5,7 @@ set_languages("c++20")
 
 add_rules("mode.debug", "mode.release")
 add_requires("gtest") -- 添加gtest依赖
+add_requires("benchmark") -- 添加benchmark依赖
 
 target("skiplist")
     set_kind("static")  -- 生成静态库
@@ -56,7 +57,7 @@ target("lsm_shared")
 
     -- 安装头文件和动态链接库
     on_install(function (target)
-        os.cp("include", path.join(target:installdir(), "include/toni-lsm"))
+        os.cp("include", path.join(target:installdir(), "include/lsmkv"))
         os.cp(target:targetfile(), path.join(target:installdir(), "lib"))
     end)
 
@@ -123,3 +124,10 @@ target("test_main")
     add_deps("lsm_shared")
     add_includedirs("include", {public = true})
     set_targetdir("$(buildir)/bin")
+
+target("benchmark_lsm")
+    set_kind("binary")  -- 生成可执行文件
+    add_files("test/benchmark_lsm.cc") -- 假设性能测试文件名为benchmark_lsm.cc
+    add_deps("lsm_shared")  -- 依赖lsm库
+    add_packages("benchmark")  -- 添加benchmark包
+    add_includedirs("include")
